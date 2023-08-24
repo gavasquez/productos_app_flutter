@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:productos_app/models/models.dart';
 
 class ProductCard extends StatelessWidget {
+  final Product product;
+  const ProductCard({required this.product});
+
   @override
   Widget build(BuildContext context) {
     return Padding(
       // padding horizontal cal container para que no quede pegado
-      padding: EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
         // top es arriba, bottom es abajo
-        margin: EdgeInsets.only(top: 30, bottom: 50),
+        margin: const EdgeInsets.only(top: 30, bottom: 50),
         width: double.infinity,
         height: 400,
         // decoracion
@@ -19,13 +23,22 @@ class ProductCard extends StatelessWidget {
           alignment: Alignment.bottomLeft,
           children: [
             // Imagenes
-            _BackgroundImage(),
+            _BackgroundImage(picture: product.picture),
             // Detalle del Producto
-            _ProductDetails(),
+            _ProductDetails(
+              name: product.name,
+              id: product.id,
+            ),
             // Precio Tag
-            Positioned(top: 0, right: 0, child: _PriceTag()),
+            Positioned(
+                top: 0,
+                right: 0,
+                child: _PriceTag(
+                  price: product.price,
+                )),
             // Disponibilidad, Mostrar de manera condicional
-            Positioned(top: 0, left: 0, child: _NotAvailable())
+            if (!product.available)
+              Positioned(top: 0, left: 0, child: _NotAvailable())
           ],
         ),
       ),
@@ -69,6 +82,8 @@ class _NotAvailable extends StatelessWidget {
 }
 
 class _PriceTag extends StatelessWidget {
+  final double price;
+  const _PriceTag({required this.price});
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -79,7 +94,7 @@ class _PriceTag extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 10),
           child: Text(
-            '\$103.994',
+            '\$$price',
             style: TextStyle(color: Colors.white, fontSize: 20),
           ),
         ),
@@ -97,6 +112,10 @@ class _PriceTag extends StatelessWidget {
 }
 
 class _ProductDetails extends StatelessWidget {
+  final String name;
+  final String? id;
+  const _ProductDetails({required this.name, this.id});
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -107,14 +126,14 @@ class _ProductDetails extends StatelessWidget {
         width: double.infinity,
         height: 70,
         decoration: _buildBoxDecoration(),
-        child: const Column(
+        child: Column(
           // mainAxisAlignment es vertical en un columna
           // crossAxisAlignment es horizontal en una columna
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Disco Duro G',
-              style: TextStyle(
+              this.name,
+              style: const TextStyle(
                   fontSize: 20,
                   color: Colors.white,
                   fontWeight: FontWeight.bold),
@@ -123,8 +142,8 @@ class _ProductDetails extends StatelessWidget {
               // si llega a ser muy largo ponga ...
               overflow: TextOverflow.ellipsis,
             ),
-            Text('Id del Disco Duro',
-                style: TextStyle(fontSize: 15, color: Colors.white))
+            Text('Id ${this.id}',
+                style: const TextStyle(fontSize: 15, color: Colors.white))
           ],
         ),
       ),
@@ -139,6 +158,8 @@ class _ProductDetails extends StatelessWidget {
 }
 
 class _BackgroundImage extends StatelessWidget {
+  final String? picture;
+  const _BackgroundImage({this.picture});
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
@@ -146,12 +167,18 @@ class _BackgroundImage extends StatelessWidget {
       child: Container(
         width: double.infinity,
         height: 400,
-        child: const FadeInImage(
-          placeholder: AssetImage('assets/jar-loading.gif'),
-          image: NetworkImage('https://via.placeholder.com/400x300/f6f6f6'),
-          // adaptar la imagen
-          fit: BoxFit.cover,
-        ),
+        // Validamos si la imagen es nula
+        child: picture == null
+            ? const Image(
+                image: AssetImage('assets/no-image.png'),
+                fit: BoxFit.cover,
+              )
+            : FadeInImage(
+                placeholder: const AssetImage('assets/jar-loading.gif'),
+                image: NetworkImage(picture!),
+                // adaptar la imagen
+                fit: BoxFit.cover,
+              ),
       ),
     );
   }

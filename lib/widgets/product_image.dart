@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class ProductImage extends StatelessWidget {
-  const ProductImage({super.key});
+  final String? url;
+
+  const ProductImage({super.key, this.url});
 
   @override
   Widget build(BuildContext context) {
@@ -12,15 +14,20 @@ class ProductImage extends StatelessWidget {
           height: 450,
           decoration: _buildBoxDecoration(),
           // ClipRRect sirve agregar border redondeados a nuestros widgets internos
-          child: const ClipRRect(
-            borderRadius: BorderRadius.only(
+          child: ClipRRect(
+            borderRadius: const BorderRadius.only(
                 topRight: Radius.circular(45), topLeft: Radius.circular(45)),
-            child: FadeInImage(
-                placeholder: AssetImage('assets/jar-loading.gif'),
-                image:
-                    NetworkImage('https://via.placeholder.com/400x300/green'),
-                // para que se estire lo mas que pueda sin que pierda las dimenciones
-                fit: BoxFit.cover),
+            // Validar la imagen
+            child: this.url == null
+                ? const Image(
+                    image: AssetImage('assets/no-image.png'),
+                    fit: BoxFit.cover,
+                  )
+                : FadeInImage(
+                    image: NetworkImage(this.url!),
+                    placeholder: const AssetImage('assets/jar-loading.gif'),
+                    // para que se estire lo mas que pueda sin que pierda las dimenciones
+                    fit: BoxFit.cover),
           ),
         ));
   }

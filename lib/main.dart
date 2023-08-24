@@ -1,13 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:productos_app/screens/screens.dart';
+import 'package:productos_app/services/services.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(AppState());
+}
+// creamos un StatelessWidget donde ponemos MultiProvider y en los providers ponemos todos los providers que vamos a usar en nuestra aplicacion
+// y se pone como child MyApp y con eso ponemos nuestro providers en el punto mas alto de la aplicacion
+class AppState extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+        providers: [ChangeNotifierProvider(create: (_) => ProductsService())],
+        child: MyApp());
+  }
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
