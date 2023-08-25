@@ -13,4 +13,10 @@ class ProductFormProvider extends ChangeNotifier {
   bool isValidForm() {
     return formKey.currentState?.validate() ?? false;
   }
+
+  // actualizar switch
+  updateAvailability(bool value) {
+    this.product.available = value;
+    notifyListeners();
+  }
 }

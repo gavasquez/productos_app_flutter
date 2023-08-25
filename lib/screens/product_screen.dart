@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:productos_app/providers/prodcut_form_provider.dart';
 import 'package:productos_app/services/products_service.dart';
 import 'package:productos_app/widgets/widgets.dart';
@@ -27,8 +28,11 @@ class _ProductScreenBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final productForm = Provider.of<ProductFormProvider>(context);
     return Scaffold(
       body: SingleChildScrollView(
+        // ocultar el teclado cuando se realiza scroll
+        /* keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag, */
         child: Column(
           children: [
             Stack(
@@ -72,8 +76,10 @@ class _ProductScreenBody extends StatelessWidget {
       // Cambiar de posicion el floatingActionButton
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       floatingActionButton: FloatingActionButton(
-          onPressed: () {
+          onPressed: () async {
             // Guardar producto
+            if (!productForm.isValidForm()) return;
+            await productService.saveOrCreateProduct(productForm.product);
           },
           child: const Icon(Icons.save_outlined)),
     );
@@ -95,56 +101,63 @@ class _ProductForm extends StatelessWidget {
         decoration: _buildBoxDecoration(),
         // contenido
         child: Form(
+            // Asigamos al key del formulario el key de nusetro provider
+            key: productForm.formKey,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
             child: Column(
-          children: [
-            const SizedBox(
-              height: 10,
-            ),
-            // Nombre Producto
-            TextFormField(
-              initialValue: product.name,
-              onChanged: (value) => product.name = value,
-              validator: (value) {
-                if (value == null || value.length < 1)
-                  return 'El nombre es obligatorio';
-              },
-              decoration: InputDecorations.authInputDecoration(
-                  hintText: 'Nombre del Producto', labelText: 'Nombre:'),
-            ),
-            const SizedBox(
-              height: 30,
-            ),
-            // Precio
-            TextFormField(
-              initialValue: '${product.price}',
-              onChanged: (value) {
-                // Validamos si se puede parsear
-                if (double.tryParse(value) == null) {
-                  product.price = 0;
-                } else {
-                  product.price = double.parse(value);
-                }
-              },
-              keyboardType: TextInputType.number,
-              decoration: InputDecorations.authInputDecoration(
-                  hintText: '\$150', labelText: 'Precio:'),
-            ),
-            const SizedBox(
-              height: 30,
-            ),
-            // SWITCH
-            SwitchListTile.adaptive(
-                title: const Text('Disponible'),
-                activeColor: Colors.indigo,
-                value: product.available,
-                onChanged: (value) {
-                  product.available = value;
-                }),
-            const SizedBox(
-              height: 30,
-            )
-          ],
-        )),
+              children: [
+                const SizedBox(
+                  height: 10,
+                ),
+                // Nombre Producto
+                TextFormField(
+                  initialValue: product.name,
+                  onChanged: (value) => product.name = value,
+                  validator: (value) {
+                    if (value == null || value.length < 1)
+                      return 'El nombre es obligatorio';
+                  },
+                  decoration: InputDecorations.authInputDecoration(
+                      hintText: 'Nombre del Producto', labelText: 'Nombre:'),
+                ),
+                const SizedBox(
+                  height: 30,
+                ),
+                // Precio
+                TextFormField(
+                  initialValue: '${product.price}',
+                  // reglas para el input solo puede escribir numeros
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(
+                        RegExp(r'^(\d+)?\.?\d{0,2}'))
+                  ],
+                  onChanged: (value) {
+                    // Validamos si se puede parsear
+                    if (double.tryParse(value) == null) {
+                      product.price = 0;
+                    } else {
+                      product.price = double.parse(value);
+                    }
+                  },
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecorations.authInputDecoration(
+                      hintText: '\$150', labelText: 'Precio:'),
+                ),
+                const SizedBox(
+                  height: 30,
+                ),
+                // SWITCH
+                SwitchListTile.adaptive(
+                    title: const Text('Disponible'),
+                    activeColor: Colors.indigo,
+                    value: product.available,
+                    onChanged: (value) =>
+                        productForm.updateAvailability(value)),
+                const SizedBox(
+                  height: 30,
+                )
+              ],
+            )),
       ),
     );
   }

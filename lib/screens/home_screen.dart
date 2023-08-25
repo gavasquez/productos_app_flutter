@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:productos_app/models/models.dart';
 import 'package:productos_app/screens/screens.dart';
 import 'package:productos_app/services/services.dart';
 import 'package:productos_app/widgets/widgets.dart';
@@ -29,13 +30,19 @@ class HomeScreen extends StatelessWidget {
                 // cuando se le de clic Navegamos al ProductScreen
                 onTap: () {
                   // se asigna selectProduct una copia del producto seleccionado
-                  productsService.selectProduct = productsService.products[index].copy();
+                  productsService.selectProduct =
+                      productsService.products[index].copy();
                   Navigator.pushNamed(context, ProductScreen.routerName);
                 },
               )),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
-        onPressed: () {},
+        onPressed: () {
+          // creamos un producto o si no nos va a salir error, le ponemos unos valores por preterminado
+          productsService.selectProduct =
+              new Product(available: false, name: '', price: 0);
+          Navigator.pushNamed(context, ProductScreen.routerName);
+        },
       ),
     );
   }
