@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:productos_app/providers/login_form_provider.dart';
 import 'package:productos_app/screens/screens.dart';
+import 'package:productos_app/services/services.dart';
 import 'package:productos_app/ui/input_decorations.dart';
 import 'package:productos_app/widgets/widgets.dart';
 import 'package:provider/provider.dart';
 
-class LoginScreen extends StatelessWidget {
-  static const String routerName = 'login';
+class RegisterScreen extends StatelessWidget {
+  static const String routerName = 'register';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,7 +23,7 @@ class LoginScreen extends StatelessWidget {
                   height: 10,
                 ),
                 Text(
-                  'Login',
+                  'Crear Cuenta',
                   style: Theme.of(context).textTheme.headline4,
                 ),
                 const SizedBox(
@@ -46,11 +47,10 @@ class LoginScreen extends StatelessWidget {
                       MaterialStateProperty.all(Colors.indigo.withOpacity(0.1)),
                   shape: MaterialStateProperty.all(StadiumBorder())),
               onPressed: () {
-                Navigator.pushReplacementNamed(
-                    context, RegisterScreen.routerName);
+                Navigator.pushReplacementNamed(context, LoginScreen.routerName);
               },
               child: const Text(
-                'Crear una nueva cuenta',
+                '¿Ya tienes una cuenta?',
                 style: TextStyle(fontSize: 18, color: Colors.black87),
               )),
           const SizedBox(height: 50)
@@ -126,15 +126,22 @@ class _LoginForm extends StatelessWidget {
                     : () async {
                         // quitar el teclado
                         FocusScope.of(context).unfocus();
-                        // validar el formuarlio si no es valido
                         if (!loginForm.isValidForm()) return;
                         loginForm.isLoading = true;
-                        await Future.delayed(Duration(seconds: 2));
-                        // validar si el login es correcto
+                        // Validar si el login es correcto
+                        // se debe poner el listen: false porque estamos en un metodo
+                        final authService =
+                            Provider.of<AuthService>(context, listen: false);
+                        final String? errorMessage = await authService
+                            .createUser(loginForm.email, loginForm.password);
+                        if (errorMessage == null) {
+                          Navigator.pushReplacementNamed(
+                              context, HomeScreen.routerName);
+                        } else {
+                          // Mostrar erro en pantalla
+                          print(errorMessage);
+                        }
                         loginForm.isLoading = false;
-                        // Si el formulario es valido, navegamos a la siguiente pantalla
-                        Navigator.pushReplacementNamed(
-                            context, HomeScreen.routerName);
                       },
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10)),
@@ -145,7 +152,7 @@ class _LoginForm extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 80, vertical: 15),
                   child: Text(
-                    loginForm.isLoading ? 'Espere...' : 'Ingresar',
+                    loginForm.isLoading ? 'Espere...' : 'Crear',
                     style: const TextStyle(color: Colors.white),
                   ),
                 ),
