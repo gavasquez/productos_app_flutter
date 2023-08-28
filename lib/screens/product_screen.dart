@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:productos_app/providers/prodcut_form_provider.dart';
 import 'package:productos_app/services/products_service.dart';
 import 'package:productos_app/widgets/widgets.dart';
@@ -57,7 +58,20 @@ class _ProductScreenBody extends StatelessWidget {
                     right: 30,
                     child: IconButton(
                         // Abrir camara o galeria
-                        onPressed: () {},
+                        onPressed: () async {
+                          // Abrir la galeria del celular
+                          final picker = new ImagePicker();
+                          final XFile? pickedFile = await picker.pickImage(
+                              source: ImageSource.gallery, imageQuality: 100);
+                          // Validamos si selecciono alguna imagen
+                          if (pickedFile == null) {
+                            print('No selecciono nada');
+                            return;
+                          }
+                          print('Tenemos imagen ${pickedFile.path}');
+                          productService
+                              .updatedSelectdProductImage(pickedFile.path);
+                        },
                         icon: const Icon(
                           Icons.camera_alt_outlined,
                           size: 40,
@@ -76,12 +90,23 @@ class _ProductScreenBody extends StatelessWidget {
       // Cambiar de posicion el floatingActionButton
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       floatingActionButton: FloatingActionButton(
-          onPressed: () async {
-            // Guardar producto
-            if (!productForm.isValidForm()) return;
-            await productService.saveOrCreateProduct(productForm.product);
-          },
-          child: const Icon(Icons.save_outlined)),
+          // Ponemos la accion de forma condicional
+          // si esta guardando se pone la accion en null para que espere hasta que guarde
+          onPressed: productService.isSaving
+              ? null
+              : () async {
+                  // Guardar producto
+                  if (!productForm.isValidForm()) return;
+                  final String? imageUrl = await productService.uploadImage();
+                  if (imageUrl != null) productForm.product.picture = imageUrl;
+                  await productService.saveOrCreateProduct(productForm.product);
+                },
+          // Si esta guardando se pone CircularProgressIndicator
+          child: productService.isSaving
+              ? const CircularProgressIndicator(
+                  color: Colors.white,
+                )
+              : const Icon(Icons.save_outlined)),
     );
   }
 }

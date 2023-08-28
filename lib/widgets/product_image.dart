@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 class ProductImage extends StatelessWidget {
@@ -21,16 +23,7 @@ class ProductImage extends StatelessWidget {
               borderRadius: const BorderRadius.only(
                   topRight: Radius.circular(45), topLeft: Radius.circular(45)),
               // Validar la imagen
-              child: this.url == null
-                  ? const Image(
-                      image: AssetImage('assets/no-image.png'),
-                      fit: BoxFit.cover,
-                    )
-                  : FadeInImage(
-                      image: NetworkImage(this.url!),
-                      placeholder: const AssetImage('assets/jar-loading.gif'),
-                      // para que se estire lo mas que pueda sin que pierda las dimenciones
-                      fit: BoxFit.cover),
+              child: getImage(url),
             ),
           ),
         ));
@@ -46,4 +39,22 @@ class ProductImage extends StatelessWidget {
                 blurRadius: 10,
                 offset: const Offset(0, 5))
           ]);
+
+  Widget getImage(String? picture) {
+    if (picture == null)
+      return Image(
+        image: AssetImage('assets/no-image.png'),
+        fit: BoxFit.cover,
+      );
+    if (picture.startsWith('http'))
+      return FadeInImage(
+          image: NetworkImage(this.url!),
+          placeholder: const AssetImage('assets/jar-loading.gif'),
+          // para que se estire lo mas que pueda sin que pierda las dimenciones
+          fit: BoxFit.cover);
+    return Image.file(
+      File(picture),
+      fit: BoxFit.cover,
+    );
+  }
 }
