@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:productos_app/providers/login_form_provider.dart';
 import 'package:productos_app/screens/screens.dart';
+import 'package:productos_app/services/services.dart';
 import 'package:productos_app/ui/input_decorations.dart';
 import 'package:productos_app/widgets/widgets.dart';
 import 'package:provider/provider.dart';
@@ -126,15 +127,23 @@ class _LoginForm extends StatelessWidget {
                     : () async {
                         // quitar el teclado
                         FocusScope.of(context).unfocus();
-                        // validar el formuarlio si no es valido
                         if (!loginForm.isValidForm()) return;
                         loginForm.isLoading = true;
-                        await Future.delayed(Duration(seconds: 2));
-                        // validar si el login es correcto
-                        loginForm.isLoading = false;
-                        // Si el formulario es valido, navegamos a la siguiente pantalla
-                        Navigator.pushReplacementNamed(
-                            context, HomeScreen.routerName);
+                        // Validar si el login es correcto
+                        // se debe poner el listen: false porque estamos en un metodo
+                        final authService =
+                            Provider.of<AuthService>(context, listen: false);
+                        final String? errorMessage = await authService.login(
+                            loginForm.email, loginForm.password);
+                        if (errorMessage == null) {
+                          Navigator.pushReplacementNamed(
+                              context, HomeScreen.routerName);
+                        } else {
+                          // Mostrar error en pantalla
+                          NotificationsService.showSnackbar(errorMessage);
+                          print(errorMessage);
+                          loginForm.isLoading = false;
+                        }
                       },
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10)),

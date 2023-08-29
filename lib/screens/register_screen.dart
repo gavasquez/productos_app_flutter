@@ -140,8 +140,8 @@ class _LoginForm extends StatelessWidget {
                         } else {
                           // Mostrar erro en pantalla
                           print(errorMessage);
+                          loginForm.isLoading = false;
                         }
-                        loginForm.isLoading = false;
                       },
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10)),

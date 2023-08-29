@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:productos_app/models/models.dart';
 import 'package:http/http.dart' as http;
 
@@ -14,6 +15,8 @@ class ProductsService extends ChangeNotifier {
   bool isSaving = false;
   // propiedad de la imagen
   File? newPictureFile;
+  // Storage
+  final storage = new FlutterSecureStorage();
 
   // Constructor
   ProductsService() {
@@ -23,7 +26,8 @@ class ProductsService extends ChangeNotifier {
   Future<List<Product>> loadProducts() async {
     this.isLoading = true;
     notifyListeners();
-    final url = Uri.https(_baseUrl, 'products.json');
+    final url = Uri.https(_baseUrl, 'products.json',
+        {'auth': await storage.read(key: 'token') ?? ''});
     // esperamos la petición
     final resp = await http.get(url);
     // Convertir la respuesta
@@ -57,7 +61,7 @@ class ProductsService extends ChangeNotifier {
   }
 
   Future<String> updateProducto(Product product) async {
-    final url = Uri.https(_baseUrl, 'products/${product.id}.json');
+    final url = Uri.https(_baseUrl, 'products/${product.id}.json', {'auth': await storage.read(key: 'token') ?? ''});
     final resp = await http.put(url, body: product.toRawJson());
     final decodedData = resp.body;
     // Actualizar el listado de prodcutos
@@ -68,7 +72,7 @@ class ProductsService extends ChangeNotifier {
   }
 
   Future<String> createdProducto(Product product) async {
-    final url = Uri.https(_baseUrl, 'products.json');
+    final url = Uri.https(_baseUrl, 'products.json', {'auth': await storage.read(key: 'token') ?? ''});
     final resp = await http.post(url, body: product.toRawJson());
     // convertimos la respuesta a un mapa, porque viene de tipo string
     final decodedData = json.decode(resp.body);

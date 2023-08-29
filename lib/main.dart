@@ -31,8 +31,10 @@ class MyApp extends StatelessWidget {
         LoginScreen.routerName: (_) => LoginScreen(),
         HomeScreen.routerName: (_) => HomeScreen(),
         ProductScreen.routerName: (_) => ProductScreen(),
-        RegisterScreen.routerName: (_) => RegisterScreen()
+        RegisterScreen.routerName: (_) => RegisterScreen(),
+        CheckAuthScreen.routerName: (_) => CheckAuthScreen()
       },
+      scaffoldMessengerKey: NotificationsService.messengerKey,
       theme: ThemeData.light().copyWith(
           scaffoldBackgroundColor: Colors.grey[300],
           // estilos del appBar
